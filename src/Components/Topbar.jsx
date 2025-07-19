@@ -1,28 +1,32 @@
-import React from 'react';
-import { Menu } from 'lucide-react';
+import React from "react";
+import { FiMenu, FiUser, FiLogOut } from "react-icons/fi";
 
-const Topbar = ({ toggleSidebar }) => {
+const Topbar = ({ toggleSidebar, onProfileClick, onLogout }) => {
   return (
-    <header
-      className="fixed top-0 right-0 h-15 bg-white shadow-md px-4 flex justify-between items-center z-10 w-full md:w-[calc(100%-16rem)] md:ml-64"
-    >
-      {/* Toggle Sidebar Button for Mobile */}
-      <button
-        onClick={toggleSidebar}
-        className="md:hidden text-gray-600 focus:outline-none"
-        aria-label="Toggle Sidebar"
-      >
-        <Menu size={24} />
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md h-16 flex items-center justify-between px-4 md:px-6">
+      <button onClick={toggleSidebar} className="md:hidden text-gray-700 text-2xl">
+        <FiMenu />
       </button>
-      <h1 className="text-xl font-semibold text-blue-600">CampusTrack Admin</h1>
 
-      {/* Admin Title or Logo */}
+      <h1 className="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
 
-      {/* Right Side - Can be expanded with Profile/Logout later */}
-      <div className="hidden md:flex items-center space-x-4">
-        <span className="text-sm text-gray-600">Welcome, Admin</span>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onProfileClick}
+          className="text-gray-600 hover:text-blue-600 transition text-xl"
+          title="View Profile"
+        >
+          <FiUser />
+        </button>
+        <button
+          onClick={onLogout}
+          className="text-gray-600 hover:text-red-500 transition text-xl"
+          title="Logout"
+        >
+          <FiLogOut />
+        </button>
       </div>
-    </header>
+    </div>
   );
 };
 

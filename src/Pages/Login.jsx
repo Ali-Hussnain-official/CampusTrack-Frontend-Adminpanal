@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, X } from 'lucide-react';
+import { useAdminAuth } from '../Context/AdminAuthContext';
 
 const Login = () => {
+  const { login } = useAdminAuth(); // ✅ Corrected function name (small 'l')
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -24,16 +26,22 @@ const Login = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    alert('Login successful (admin UI only)');
-    navigate('/dashboard');
+    const success = login(formData.email, formData.password); // ✅ Correct function name used
+
+    if (success) {
+      alert('Login successful');
+      navigate('/dashboard');
+    } else {
+      alert('Invalid credentials');
+    }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <div className="bg-white shadow-md rounded-md p-8 w-full max-w-md relative">
-        {/* ❌ Close Button inside form box */}
+        {/* Close Button */}
         <button
-          onClick={() => navigate(-1)} // or navigate('/') to redirect home
+          onClick={() => navigate(-1)}
           className="absolute top-3 right-3 text-gray-600 hover:text-red-600 transition"
           aria-label="Close"
         >

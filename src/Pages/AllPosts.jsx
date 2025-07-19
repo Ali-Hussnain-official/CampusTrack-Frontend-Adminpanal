@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import SearchFilterBar from '../Components/SearchFilterBar';   // ← path as in your project
+import SearchFilterBar from '../Components/SearchFilterBar';
 
 const AllPosts = () => {
-  /* ───── Dummy master list ───── */
   const postsData = [
     {
       id: 1,
@@ -20,6 +19,17 @@ const AllPosts = () => {
       title: 'Found Phone',
       type: 'found',
       status: 'approved',
+      userName: 'Sara Ahmed',
+      userEmail: 'sara@example.com',
+      date: '2024-05-12',
+      desc: 'Black iPhone 12 found near cafeteria.',
+      img: 'https://placehold.co/120x120?text=Phone',
+    },
+    {
+      id: 2,
+      title: 'Found Phone',
+      type: 'found',
+      status: 'pending',
       userName: 'Sara Ahmed',
       userEmail: 'sara@example.com',
       date: '2024-05-12',
@@ -48,47 +58,68 @@ const AllPosts = () => {
       desc: 'Silver wrist‑watch (Fossil).',
       img: 'https://placehold.co/120x120?text=Watch',
     },
+    {
+      id: 5,
+      title: 'Lost ID Card',
+      type: 'lost',
+      status: 'pending',
+      userName: 'Bilal Shah',
+      userEmail: 'bilal@example.com',
+      date: '2024-05-16',
+      desc: 'University ID card.',
+      img: 'https://placehold.co/120x120?text=ID',
+    },
+    {
+      id: 6,
+      title: 'Found Book',
+      type: 'found',
+      status: 'approved',
+      userName: 'Hina Tariq',
+      userEmail: 'hina@example.com',
+      date: '2024-05-17',
+      desc: 'Mathematics textbook found in library.',
+      img: 'https://placehold.co/120x120?text=Book',
+    },
   ];
 
-  /* ───── UI state ───── */
   const [searchTerm, setSearchTerm]     = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterType, setFilterType]     = useState('');
-  const [selected, setSelected]         = useState(null);   // modal
+  const [selected, setSelected]         = useState(null);
 
-  /* ───── Filter logic ───── */
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 5;
+
+  // Filter logic
   const filtered = postsData.filter((p) => {
     const term = searchTerm.toLowerCase();
-
-    // title OR email match
     const matchText =
       term
-        ? p.title.toLowerCase().includes(term) ||
-          p.userEmail.toLowerCase().includes(term)
+        ? p.title.toLowerCase().includes(term) || p.userEmail.toLowerCase().includes(term)
         : true;
-
-    const matchStatus =
-      filterStatus ? p.status === filterStatus : true;
-
-    const matchType =
-      filterType ? p.type === filterType : true;
-
+    const matchStatus = filterStatus ? p.status === filterStatus : true;
+    const matchType = filterType ? p.type === filterType : true;
     return matchText && matchStatus && matchType;
   });
 
-  /* ───── JSX below is unchanged (table, cards, modal) ───── */
+  // Pagination logic
+  const indexOfLast = currentPage * postsPerPage;
+  const indexOfFirst = indexOfLast - postsPerPage;
+  const currentPosts = filtered.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filtered.length / postsPerPage);
+
   return (
     <div className="w-full px-4 md:px-6 pt-6">
       <h2 className="text-2xl font-bold text-blue-600 mb-4">All Posts</h2>
 
-      {/* Search + Dropdown Filters */}
       <SearchFilterBar
-        searchTerm={searchTerm}       setSearchTerm={setSearchTerm}
-        filterStatus={filterStatus}   setFilterStatus={setFilterStatus}
-        filterType={filterType}       setFilterType={setFilterType}
+        searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+        filterStatus={filterStatus} setFilterStatus={setFilterStatus}
+        filterType={filterType} setFilterType={setFilterType}
       />
 
-      {/* ------------- Desktop Table ------------- */}
+      {/* Table View */}
       <div className="hidden md:block overflow-x-auto mt-4 bg-white p-4 rounded shadow-md">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
@@ -104,46 +135,35 @@ const AllPosts = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.length ? (
-              filtered.map((p, idx) => (
-                <tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border">{idx + 1}</td>
-                  <td className="px-4 py-2 border">
-                    <img src={p.img} alt={p.title} className="w-12 h-12 object-cover rounded" />
-                  </td>
-                  <td className="px-4 py-2 border">{p.title}</td>
-                  <td className="px-4 py-2 border capitalize">{p.type}</td>
-                  <td className="px-4 py-2 border capitalize">{p.status}</td>
-                  <td className="px-4 py-2 border">{p.date}</td>
-                  <td className="px-4 py-2 border">{p.userEmail}</td>
-                  <td className="px-4 py-2 border space-x-2">
-                    <button
-                      onClick={() => setSelected(p)}
-                      className="text-blue-600 hover:underline"
-                    >
-                      View
-                    </button>
-                    {p.status === 'pending' && (
-                      <button className="text-green-600 hover:underline">Approve</button>
-                    )}
-                    <button className="text-red-600 hover:underline">Delete</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="py-4 text-center text-gray-500">
-                  No matching posts found.
+            {currentPosts.length ? currentPosts.map((p, idx) => (
+              <tr key={p.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2 border">{indexOfFirst + idx + 1}</td>
+                <td className="px-4 py-2 border">
+                  <img src={p.img} alt={p.title} className="w-12 h-12 object-cover rounded" />
                 </td>
+                <td className="px-4 py-2 border">{p.title}</td>
+                <td className="px-4 py-2 border capitalize">{p.type}</td>
+                <td className="px-4 py-2 border capitalize">{p.status}</td>
+                <td className="px-4 py-2 border">{p.date}</td>
+                <td className="px-4 py-2 border">{p.userEmail}</td>
+                <td className="px-4 py-2 border space-x-2">
+                  <button onClick={() => setSelected(p)} className="text-blue-600 hover:underline">View</button>
+                  {p.status === 'pending' && <button className="text-green-600 hover:underline">Approve</button>}
+                  <button className="text-red-600 hover:underline">Delete</button>
+                </td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan="8" className="py-4 text-center text-gray-500">No matching posts found.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* ------------- Mobile Cards ------------- */}
+      {/* Mobile Cards */}
       <div className="md:hidden space-y-4 mt-4">
-        {filtered.map((p) => (
+        {currentPosts.map((p) => (
           <div key={p.id} className="bg-white p-4 rounded shadow-md">
             <div className="flex gap-3">
               <img src={p.img} alt={p.title} className="w-20 h-20 object-cover rounded" />
@@ -155,35 +175,49 @@ const AllPosts = () => {
               </div>
             </div>
             <div className="flex space-x-4 text-sm mt-3">
-              <button onClick={() => setSelected(p)} className="text-blue-600 hover:underline">
-                View
-              </button>
-              {p.status === 'pending' && (
-                <button className="text-green-600 hover:underline">Approve</button>
-              )}
+              <button onClick={() => setSelected(p)} className="text-blue-600 hover:underline">View</button>
+              {p.status === 'pending' && <button className="text-green-600 hover:underline">Approve</button>}
               <button className="text-red-600 hover:underline">Delete</button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ------------- Modal ------------- */}
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          <button
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white max-w-md w-full p-6 rounded shadow-lg relative">
-            <button
-              onClick={() => setSelected(null)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-
-            <img
-              src={selected.img}
-              alt={selected.title}
-              className="w-full h-48 object-cover rounded mb-4"
-            />
-
+            <button onClick={() => setSelected(null)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">✕</button>
+            <img src={selected.img} alt={selected.title} className="w-full h-48 object-cover rounded mb-4" />
             <h3 className="text-xl font-semibold mb-2">{selected.title}</h3>
             <p><span className="font-medium">Type:</span> {selected.type}</p>
             <p><span className="font-medium">Status:</span> {selected.status}</p>

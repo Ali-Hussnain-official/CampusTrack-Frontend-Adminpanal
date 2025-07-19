@@ -1,39 +1,54 @@
-// src/Layout/AdminLayouts.jsx
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
-import Topbar  from "../Components/Topbar";
+import Topbar from "../components/Topbar";
+import AdminProfileModal from "../Components/AdminProfileModal";
+import { useNavigate } from "react-router-dom";
+
 
 const AdminLayout = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // default closed on mobile
+  const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    navigate("/");
+  };
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* ─── Sidebar (fixed on both mobile & desktop) ─── */}
-      <div
-        className={`fixed md:fixed z-40 transform transition-transform duration-300
-                    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-                    md:translate-x-0 w-64 bg-white shadow-lg
-                    top-16 md:top-0 h-[calc(100%-4rem)] md:h-screen overflow-y-auto`}
-      >
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      </div>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* ─── Topbar ─── */}
+      <Topbar
+        toggleSidebar={toggleSidebar}
+        onProfileClick={() => setShowProfile(true)}
+        onLogout={handleLogout}
+      />
 
-      {/* ─── Mobile overlay (dim rest of screen) ─── */}
-      {isSidebarOpen && (
+      <div className="flex flex-1 pt-16">
+        {/* ─── Sidebar ─── */}
         <div
-          onClick={toggleSidebar}
-          // className="fixed top-16 left-64 right-0 bottom-0 bg-black/40 z-30 md:hidden"
-        />
-      )}
+          className={`fixed md:relative z-40 transform transition-transform duration-300 
+                      ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+                      md:translate-x-0 w-64 bg-white shadow-lg h-full md:h-auto`}
+        >
+          <Sidebar
+            isOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+            onProfileClick={() => setShowProfile(true)}
+            onLogout={handleLogout}
+          />
+        </div>
 
-      {/* ─── Main content area ─── */}
-      <div className="flex flex-col flex-1 md:ml-64">
-        <Topbar toggleSidebar={toggleSidebar} />
-        {/* push content below fixed topbar */}
-        <main className="mt-16 px-4 pt-4 pb-6 md:px-6">{children}</main>
+        {/* ─── Main Content ─── */}
+        {/* <main className="flex-1 p-4 md:ml-64">{children}</main> */}
+        <main className="mt- p-4 md:p-6 w-full max-w-[1400px] mx-auto">{children}</main>
+
       </div>
+
+      {/* ─── Profile Modal ─── */}
+      <AdminProfileModal isOpen={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );
 };
